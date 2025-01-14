@@ -17,7 +17,7 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
         try
         {
             var context = Context;
-            await NicknameService.ChangeNickname(context, user, nickname);
+            await NicknameService.VoteForNickName(context, user, nickname);
 
             return "Success";
         }
