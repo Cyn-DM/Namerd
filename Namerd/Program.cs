@@ -19,8 +19,6 @@ builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents
     .AddApplicationCommands<ApplicationCommandInteraction, ApplicationCommandContext>()
     .AddGatewayEventHandlers(typeof(Program).Assembly);
 
-builder.Services.AddScoped<NicknameService>();
-
 
 var host = builder.Build();
 

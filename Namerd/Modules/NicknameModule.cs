@@ -8,29 +8,43 @@ namespace Namerd.Modules;
 
 public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext>
 {
-
     
-    [SlashCommand("namevote", "Starts a nickname vote")]
-    public async Task<string> StartVote(GuildUser user, string nickname)
+    [SlashCommand("nicknamevote", "Starts a nickname vote")]
+    public async Task StartVote(GuildUser user, string nickname, int timeInMinutes)
     {
-
         try
         {
-            var context = Context;
-            await NicknameService.VoteForNickName(context, user, nickname);
+            var callback = InteractionCallback.Message(
+                new InteractionMessageProperties
+                {
+                    Content = "Got your vote request!",
+                    Flags = MessageFlags.Ephemeral
+                }
+            );
 
-            return "Success";
-        }
-        catch (UserIsOwnerException ex)
-        {
-            return ex.Message;
+            await RespondAsync(callback);
+            
+            var context = Context;
+
+            if (await NicknameService.ValidateNickname(context, nickname) && await NicknameService.CheckTime(context, timeInMinutes))
+            {
+                await NicknameService.VoteForNickName(context, user, nickname, timeInMinutes);
+            }
         }
         catch (Exception e)
         {
-            return "Failed";
+            Console.WriteLine(e.Message);
+            
+            var callback = InteractionCallback.Message(
+                new InteractionMessageProperties
+                {
+                    Content = "Got your vote request, but something went wrong.",
+                    Flags = MessageFlags.Ephemeral
+                }
+            );
+
+            await RespondAsync(callback);
         }
     }
-
-   
-
+    
 }

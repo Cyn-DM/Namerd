@@ -1,4 +1,5 @@
-﻿using Namerd.CustomExceptions;
+﻿using System.Text.RegularExpressions;
+using Namerd.CustomExceptions;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Rest;
@@ -6,11 +7,53 @@ using NetCord.Services.ApplicationCommands;
 
 namespace Namerd.Services;
 
-public class NicknameService
+public static partial class NicknameService
 {
+    [GeneratedRegex(@"^(?=.{2,32}$)(?!(?:everyone|here)$)\.?[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*\.?$")]
+
+    private static partial Regex NicknameRegex();
     
-    
-    public static async Task ChangeNickname(ApplicationCommandContext context, GuildUser user, string nickname)
+    public static async Task<bool> ValidateNickname(ApplicationCommandContext context, string nickname)
+    {
+        var result = NicknameRegex().Match(nickname);
+        
+        if (!result.Success)
+        {
+            await MessageCreator.CreateInvalidNickNameMessage(context, nickname);
+        }
+        
+        return result.Success;
+    }
+
+    public static async Task VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
+    {
+        var message = await MessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
+        
+        var milliseconds = timeInMinutes * 60 * 1000;
+        
+        await Task.Delay(milliseconds);
+        
+        var updatedMessage = await context.Channel.GetMessageAsync(message.Id);
+        
+        var voteSuceeded = CheckVoteSuccess(updatedMessage);
+
+        try
+        {
+            if (voteSuceeded)
+            {
+                await ChangeNickname(context, user, nickname);
+            }
+
+            await MessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, false);
+        }
+        catch (UserIsOwnerException)
+        {
+            await MessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, true);
+        }
+        
+    }
+
+    private static async Task ChangeNickname(ApplicationCommandContext context, GuildUser user, string nickname)
     {
         var guild = context.Interaction.Guild ?? await context.Client.Rest.GetGuildAsync(context.Interaction.GuildId.Value);
             
@@ -20,76 +63,6 @@ public class NicknameService
         }
             
         await user.ModifyAsync(x => x.Nickname = nickname);
-    }
-
-    public static async Task VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname)
-    {
-        var message = await CreateVoteStartMessage(context, user, nickname);
-        
-        await Task.Delay(30000);
-        
-        var updatedMessage = await context.Channel.GetMessageAsync(message.Id);
-        
-        var voteSuceeded = CheckVoteSuccess(updatedMessage);
-
-        if (voteSuceeded)
-        {
-            await ChangeNickname(context, user, nickname);
-        }
-
-        await CreateVoteResultMessage(context, user, nickname, voteSuceeded);
-    }
-
-    private static (string voteStarterName, string changingUserName) GetUsernames(ApplicationCommandContext context, GuildUser user)
-    {
-        var voteStarterName = context.User.Username;
-        
-        if (context.Interaction.User is GuildInteractionUser guildUser)
-        {
-            var voteStarterNickname = guildUser.Nickname;
-
-            if (voteStarterNickname != null)
-            {
-                voteStarterName = voteStarterNickname;
-            }
-        }
-
-        var changingUserName = user.Username;
-        
-        if (user.Nickname != null)
-        {
-            changingUserName = user.Nickname;
-        }
-        
-        return (voteStarterName, changingUserName);
-    }
-
-    private static async Task<RestMessage> CreateVoteStartMessage(ApplicationCommandContext context, GuildUser user, string nickname)
-    {
-        var usernames = GetUsernames(context, user);
-        
-        var embed = new EmbedProperties()
-            .WithTitle($"New nickname vote for {usernames.changingUserName}!")
-            .WithDescription($"{usernames.voteStarterName} wants to start a vote to change {usernames.changingUserName}'s nickname.")
-            .AddFields(
-                new EmbedFieldProperties().WithName("\u200B").WithValue("\u200B"),
-                new EmbedFieldProperties().WithName("The nickname:").WithValue(nickname),
-                new EmbedFieldProperties().WithName("\u200B").WithValue("\u200B"),
-                new EmbedFieldProperties().WithValue("Please vote by choosing a reaction on the message.")
-                )
-            .WithColor(new (0xE8004F));
-        
-        
-        var messageProperties = new MessageProperties
-        {
-            Embeds = [embed]
-        };
-
-        var message = await context.Channel.SendMessageAsync(messageProperties);
-        await message.AddReactionAsync("👍");
-        await message.AddReactionAsync("👎");
-
-        return message;
     }
 
     private static bool CheckVoteSuccess(RestMessage restMessage)
@@ -110,7 +83,7 @@ public class NicknameService
             }
         }
 
-        if (yesCount > 1 && yesCount > noCount)
+        if (yesCount > noCount)
         {
             return true;
         }
@@ -118,39 +91,15 @@ public class NicknameService
         return false;
     }
 
-    private static async Task<RestMessage> CreateVoteResultMessage(ApplicationCommandContext context, GuildUser user,
-        string nickname, bool voteSucceeded)
+    public static async Task<bool> CheckTime(ApplicationCommandContext context, int timeInMinutes)
     {
-        var usernames = GetUsernames(context, user);
-
-        var result = "";
-        if (voteSucceeded)
+        if (timeInMinutes <= 0 || timeInMinutes > 1440)
         {
-            result = "The vote succeeded and the nickname has been changed!";
+            await MessageCreator.CreateInvalidTimeMessage(context);
+            return false;
         }
-        else
-        {
-            result = "The vote failed!";
-        }
-        
-        
-        var embed = new EmbedProperties()
-            .WithTitle($"Voting completed for {usernames.changingUserName}!")
-            .WithDescription(result)
-            .AddFields(
-                new EmbedFieldProperties().WithName("\u200B").WithValue("\u200B"),
-                new EmbedFieldProperties().WithName("The nickname:").WithValue(nickname)
-            )
-            .WithColor(new (0xE8004F));
-        
-        
-        var messageProperties = new MessageProperties
-        {
-            Embeds = [embed]
-        };
 
-        var message = await context.Channel.SendMessageAsync(messageProperties);
-
-        return message;
+        return true;
     }
+
 }
