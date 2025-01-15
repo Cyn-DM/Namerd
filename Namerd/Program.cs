@@ -11,7 +11,9 @@ using NetCord.Services.ApplicationCommands;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Configuration.AddUserSecrets<Program>();
+builder.Configuration
+    .AddEnvironmentVariables()
+    .AddUserSecrets<Program>();
 
 builder.Services.Configure<GatewayClientOptions>(builder.Configuration.GetSection("Token"));
 
