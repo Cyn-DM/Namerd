@@ -14,7 +14,7 @@ public static class MessageCreator
         var result = "";
         if (voteSucceeded && !userIsOwner)
         {
-            result = "The vote succeeded and the nickname has been changed!";
+            result = $"The vote succeeded and the nickname has been changed! I dub thee {nickname}.";
         } else if (voteSucceeded && userIsOwner)
         {
             result = "The vote succeeded, " +
@@ -30,10 +30,6 @@ public static class MessageCreator
         var embed = new EmbedProperties()
             .WithTitle($"Voting completed for {usernames.changingUserName}!")
             .WithDescription(result)
-            .AddFields(
-                new EmbedFieldProperties().WithName("\u200B").WithValue("\u200B"),
-                new EmbedFieldProperties().WithName("The nickname:").WithValue(nickname)
-            )
             .WithColor(new (0xE8004F));
         
         
@@ -68,11 +64,19 @@ public static class MessageCreator
             Embeds = [embed]
         };
 
+
+        await CreateMentionMessage(context, user);
         var message = await context.Channel.SendMessageAsync(messageProperties);
         await message.AddReactionAsync("👍");
         await message.AddReactionAsync("👎");
 
         return message;
+    }
+
+    private static async Task CreateMentionMessage(ApplicationCommandContext context, GuildUser user)
+    {
+        string messageContent = $"Calling {user}!"; // 'user.ToString()' returns the mention string
+        await context.Channel.SendMessageAsync(messageContent);
     }
 
     public static async Task CreateInvalidNickNameMessage(ApplicationCommandContext context, string nickname)
