@@ -9,13 +9,15 @@ namespace Namerd.Services;
 
 public static partial class NicknameService
 {
-    [GeneratedRegex(@"^(?=.{2,32}$)(?!(?:everyone|here)$)\.?[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*\.?$")]
+    [GeneratedRegex(@"^(?=.{2,32}$)(?!(?:everyone|here)$).+$", RegexOptions.Singleline)]
 
     private static partial Regex NicknameRegex();
     
     public static async Task<bool> ValidateNickname(ApplicationCommandContext context, string nickname)
     {
         var result = NicknameRegex().Match(nickname);
+        
+        Console.WriteLine(nickname.Length);
         
         if (!result.Success)
         {

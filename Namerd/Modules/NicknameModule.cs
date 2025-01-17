@@ -23,12 +23,20 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
             );
 
             await RespondAsync(callback);
-            
+
             var context = Context;
 
-            if (await NicknameService.ValidateNickname(context, nickname) && await NicknameService.CheckTime(context, timeInMinutes))
+            if (await NicknameService.ValidateNickname(context, nickname) &&
+                await NicknameService.CheckTime(context, timeInMinutes))
             {
                 await NicknameService.VoteForNickName(context, user, nickname, timeInMinutes);
+            }
+        }
+        catch (RestException ex)
+        {
+            if (ex.ReasonPhrase != null)
+            {
+                await MessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase);
             }
         }
         catch (Exception e)

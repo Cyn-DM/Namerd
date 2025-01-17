@@ -88,6 +88,21 @@ public static class MessageCreator
 
         await context.Channel.SendMessageAsync(messageProperties);
     }
+    
+    public static async Task CreateDiscordExceptionMessage(ApplicationCommandContext context, string discordException)
+    {
+        var embed = new EmbedProperties()
+            .WithTitle($"Sorry, could not process your request. Discord exception:")
+            .WithDescription(discordException)
+            .WithColor(new (0xE8004F));
+        
+        var messageProperties = new MessageProperties
+        {
+            Embeds = [embed]
+        };
+
+        await context.Channel.SendMessageAsync(messageProperties);
+    }
 
     private static (string voteStarterName, string changingUserName) GetUsernames(ApplicationCommandContext context, GuildUser user)
     {
