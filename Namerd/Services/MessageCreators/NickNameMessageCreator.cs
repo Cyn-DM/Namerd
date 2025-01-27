@@ -2,9 +2,9 @@
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
-namespace Namerd.Services;
+namespace Namerd.Services.MessageCreators;
 
-public static class MessageCreator
+public static class NickNameMessageCreator
 {
     public static async Task<RestMessage> CreateVoteResultMessage(ApplicationCommandContext context, GuildUser user,
         string nickname, bool voteSucceeded, bool userIsOwner)
@@ -83,21 +83,6 @@ public static class MessageCreator
     {
         var embed = new EmbedProperties()
             .WithTitle($"Sorry, {nickname} is not a valid nickname.")
-            .WithColor(new (0xE8004F));
-        
-        var messageProperties = new MessageProperties
-        {
-            Embeds = [embed]
-        };
-
-        await context.Channel.SendMessageAsync(messageProperties);
-    }
-    
-    public static async Task CreateDiscordExceptionMessage(ApplicationCommandContext context, string discordException)
-    {
-        var embed = new EmbedProperties()
-            .WithTitle($"Sorry, could not process your request. Discord exception:")
-            .WithDescription(discordException)
             .WithColor(new (0xE8004F));
         
         var messageProperties = new MessageProperties

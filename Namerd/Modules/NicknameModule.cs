@@ -1,5 +1,6 @@
 ﻿using Namerd.CustomExceptions;
 using Namerd.Services;
+using Namerd.Services.MessageCreators;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
@@ -36,7 +37,7 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
         {
             if (ex.ReasonPhrase != null)
             {
-                await MessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase);
+                await GeneralMessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase);
             }
         }
         catch (Exception e)

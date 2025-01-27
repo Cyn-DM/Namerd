@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Namerd.CustomExceptions;
+using Namerd.Services.MessageCreators;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Rest;
@@ -21,7 +22,7 @@ public static partial class NicknameService
         
         if (!result.Success)
         {
-            await MessageCreator.CreateInvalidNickNameMessage(context, nickname);
+            await NickNameMessageCreator.CreateInvalidNickNameMessage(context, nickname);
         }
         
         return result.Success;
@@ -29,7 +30,7 @@ public static partial class NicknameService
 
     public static async Task VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
     {
-        var message = await MessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
+        var message = await NickNameMessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
         
         var milliseconds = timeInMinutes * 60 * 1000;
         
@@ -46,11 +47,11 @@ public static partial class NicknameService
                 await ChangeNickname(context, user, nickname);
             }
 
-            await MessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, false);
+            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, false);
         }
         catch (UserIsOwnerException)
         {
-            await MessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, true);
+            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, true);
         }
         
     }
@@ -97,7 +98,7 @@ public static partial class NicknameService
     {
         if (timeInMinutes <= 0 || timeInMinutes > 1440)
         {
-            await MessageCreator.CreateInvalidTimeMessage(context);
+            await NickNameMessageCreator.CreateInvalidTimeMessage(context);
             return false;
         }
 
