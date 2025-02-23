@@ -1,10 +1,20 @@
-﻿using NetCord;
+﻿using Namerd.Persistence.Repository;
+using Namerd.Services.MessageCreators;
+using NetCord;
 using NetCord.Services.ApplicationCommands;
 
 namespace Namerd.Services;
 
 public class SettingsService
 {
+    private readonly BotRepository _botRepository;
+
+    public SettingsService(BotRepository botRepository)
+    {
+        _botRepository = botRepository;
+
+    }
+    
     public async Task SetNominationChannel(ApplicationCommandContext context)
     {
         var user = context.User;
@@ -16,9 +26,12 @@ public class SettingsService
 
         if ((userPermissions & Permissions.Administrator) != 0)
         {
-            // Save settings here
+            await _botRepository.SetNominationChannel(context.Guild.Id, context.Channel.Id);
+            await SettingMessageCreator.CreateSettingSucceeded(context, "Successfully set nomination channel.");
         }
-        
-        var channel = context.Channel;
+        else
+        {
+            await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
+        }
     }
 }

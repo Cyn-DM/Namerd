@@ -11,4 +11,14 @@ public class NamerdContext : DbContext
     }
     
     public DbSet<NamerdBot> Bots { get; set; }
+    public DbSet<Settings> Settings { get; set; }
+    public DbSet<MonthlyNomination> MonthlyNominations { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<NamerdBot>()
+            .HasMany(n => n.MonthlyNomination)
+            .WithOne(n => n.bot)
+            .HasForeignKey(n => n.botId);
+    }
 }

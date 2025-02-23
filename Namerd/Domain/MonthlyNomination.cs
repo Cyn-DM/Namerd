@@ -8,6 +8,8 @@ public class MonthlyNomination
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+    public ulong botId { get; set; }
+    public NamerdBot bot { get; set; }
     public List<NominationDetails> NominationDetails { get; set; } = new List<NominationDetails>();
     public DateTime StartDateTime { get; set; }
     public DateTime EndDateTime { get; set; }
