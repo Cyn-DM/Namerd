@@ -14,6 +14,25 @@ public class SettingsService
         _botRepository = botRepository;
 
     }
+
+    public async Task CallSettingsMenu(ApplicationCommandContext context)
+    {
+        var user = context.User;
+        Permissions userPermissions = new Permissions();
+        if (user is GuildInteractionUser guildUser)
+        {
+            userPermissions = guildUser.Permissions;
+        }
+
+        if ((userPermissions & Permissions.Administrator) != 0)
+        {
+            await SettingMessageCreator.CreateSettingMenuMessage(context);
+        }
+        else
+        {
+            await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
+        }
+    }
     
     public async Task SetNominationChannel(ApplicationCommandContext context)
     {

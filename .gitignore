@@ -3,3 +3,12 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+.idea/.idea.Namerd/.idea/codebuddy.xml
+
+.codebuddy/summary.md
+
+.codebuddy/db/lucene/segments_1
+
+.codebuddy/db/lucene/version.txt
+
+.codebuddy/db/lucene/write.lock

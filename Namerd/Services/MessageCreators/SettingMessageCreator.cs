@@ -19,6 +19,31 @@ public static class SettingMessageCreator
         await context.Channel.SendMessageAsync(messageProperties);
     }
     
+    public static async Task CreateSettingMenuMessage(ApplicationCommandContext context)
+    {
+        var embed = new EmbedProperties()
+            .WithTitle($"Choose the setting you want to change.")
+            .WithColor(new (0xE8004F));
+
+        var settingOptions = new[]
+        {
+            new StringMenuSelectOptionProperties("Monthly Nomination Channel", "monthlyNominationChannel"),
+        };
+
+        var components = new[]
+        {
+            new StringMenuProperties("settingsMenu", settingOptions),
+        };
+        
+        var messageProperties = new MessageProperties
+        {
+            Embeds = [embed],
+            Components = components,
+        };
+
+        await context.Channel.SendMessageAsync(messageProperties);
+    }
+    
     public static async Task CreateSettingSucceeded(ApplicationCommandContext context, string message)
     {
         var embed = new EmbedProperties()
