@@ -1,11 +1,14 @@
-﻿using NetCord.Rest;
+﻿using NetCord;
+using NetCord.Rest;
+using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
 
 namespace Namerd.Services.MessageCreators;
 
 public static class SettingMessageCreator
 {
-    public static async Task CreateSettingPermissionExceptionMessage(ApplicationCommandContext context)
+    public static async Task CreateSettingPermissionExceptionMessage(IInteractionContext context)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Sorry, could not process your request. You do not have the necessary permissions.")
@@ -16,10 +19,10 @@ public static class SettingMessageCreator
             Embeds = [embed]
         };
 
-        await context.Channel.SendMessageAsync(messageProperties);
+        await context.Interaction.Channel.SendMessageAsync(messageProperties);
     }
     
-    public static async Task CreateSettingMenuMessage(ApplicationCommandContext context)
+    public static async Task CreateSettingMenuMessage(IInteractionContext context)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Choose the setting you want to change.")
@@ -41,10 +44,10 @@ public static class SettingMessageCreator
             Components = components,
         };
 
-        await context.Channel.SendMessageAsync(messageProperties);
+        await context.Interaction.Channel.SendMessageAsync(messageProperties);
     }
     
-    public static async Task CreateSettingSucceeded(ApplicationCommandContext context, string message)
+    public static async Task CreateSettingSucceeded(IInteractionContext context, string message)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Successfully changed the setting!")
@@ -56,6 +59,30 @@ public static class SettingMessageCreator
             Embeds = [embed]
         };
 
-        await context.Channel.SendMessageAsync(messageProperties);
+        await context.Interaction.Channel.SendMessageAsync(messageProperties);
+    }
+
+    public static async Task CreateChannelSettingSelectMessage(IInteractionContext context)
+    {
+        var embed = new EmbedProperties()
+            .WithTitle($"Please choose the channel you want to set the nomination channel to.")
+            .WithColor(new (0xE8004F));
+        
+        var channelComponent = new ChannelMenuProperties("nominationChannelSelect")
+            .AddChannelTypes(ChannelType.TextGuildChannel)
+            .WithPlaceholder("Select a channel.");
+        
+        var components = new[]
+        {
+            channelComponent
+        };
+
+        var messageProperties = new MessageProperties()
+        {
+            Embeds = [embed],
+            Components = components,
+        };
+        
+        await context.Interaction.Channel.SendMessageAsync(messageProperties);
     }
 }

@@ -1,11 +1,12 @@
 ﻿using NetCord.Rest;
+using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
 
 namespace Namerd.Services.MessageCreators
 {
     public static class GeneralMessageCreator
     {
-        public static async Task CreateDiscordExceptionMessage(ApplicationCommandContext context, string discordException)
+        public static async Task CreateDiscordExceptionMessage(IInteractionContext context, string discordException)
         {
             var embed = new EmbedProperties()
                 .WithTitle($"Sorry, could not process your request. Discord exception:")
@@ -17,7 +18,7 @@ namespace Namerd.Services.MessageCreators
                 Embeds = [embed]
             };
 
-            await context.Channel.SendMessageAsync(messageProperties);
+            await context.Interaction.Channel.SendMessageAsync(messageProperties);
         }
     }
 }

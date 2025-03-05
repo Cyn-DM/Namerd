@@ -1,7 +1,9 @@
 ﻿using Namerd.Persistence.Repository;
 using Namerd.Services.MessageCreators;
 using NetCord;
+using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
 
 namespace Namerd.Services;
 
@@ -33,8 +35,8 @@ public class SettingsService
             await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
         }
     }
-    
-    public async Task SetNominationChannel(ApplicationCommandContext context)
+
+    public async Task CallNominationChannelMenu(StringMenuInteractionContext context)
     {
         var user = context.User;
         Permissions userPermissions = new Permissions();
@@ -45,7 +47,26 @@ public class SettingsService
 
         if ((userPermissions & Permissions.Administrator) != 0)
         {
-            await _botRepository.SetNominationChannel(context.Guild.Id, context.Channel.Id);
+            await SettingMessageCreator.CreateChannelSettingSelectMessage(context);
+        }
+        else
+        {
+            await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
+        }
+    }
+    
+    public async Task SetNominationChannel(IInteractionContext context, Channel channel)
+    {
+        var user = context.Interaction.User;
+        Permissions userPermissions = new Permissions();
+        if (user is GuildInteractionUser guildUser)
+        {
+            userPermissions = guildUser.Permissions;
+        }
+
+        if ((userPermissions & Permissions.Administrator) != 0)
+        {
+            await _botRepository.SetNominationChannel(context.Interaction.Guild.Id, channel.Id);
             await SettingMessageCreator.CreateSettingSucceeded(context, "Successfully set nomination channel.");
         }
         else

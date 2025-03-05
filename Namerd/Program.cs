@@ -27,18 +27,23 @@ builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 builder.Services.Configure<GatewayClientOptions>(builder.Configuration.GetSection("Token"));
 builder.Services.AddDbContext<NamerdContext>(options => options.UseNpgsql(dbConnectionString));
-builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents.All; })
-    .AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>()
-    .AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>()
-    .AddComponentInteractions<UserMenuInteraction, UserMenuInteractionContext>()
-    .AddComponentInteractions<RoleMenuInteraction, RoleMenuInteractionContext>()
-    .AddComponentInteractions<MentionableMenuInteraction, MentionableMenuInteractionContext>()
-    .AddComponentInteractions<ChannelMenuInteraction, ChannelMenuInteractionContext>()
-    .AddComponentInteractions<ModalInteraction, ModalInteractionContext>()
-    .AddApplicationCommands<ApplicationCommandInteraction, ApplicationCommandContext>()
-    .AddScoped<SettingsService>()
-    .AddScoped<BotRepository>()
-    .AddGatewayEventHandlers(typeof(Program).Assembly);
+
+builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents.All; });
+
+builder.Services.AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>();
+builder.Services.AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>();
+builder.Services.AddComponentInteractions<UserMenuInteraction, UserMenuInteractionContext>();
+builder.Services.AddComponentInteractions<RoleMenuInteraction, RoleMenuInteractionContext>();
+builder.Services.AddComponentInteractions<MentionableMenuInteraction, MentionableMenuInteractionContext>();
+builder.Services.AddComponentInteractions<ChannelMenuInteraction, ChannelMenuInteractionContext>();
+builder.Services.AddComponentInteractions<ModalInteraction, ModalInteractionContext>();
+
+builder.Services.AddApplicationCommands<ApplicationCommandInteraction, ApplicationCommandContext>();
+
+builder.Services.AddScoped<SettingsService>();
+builder.Services.AddScoped<BotRepository>();
+
+builder.Services.AddGatewayEventHandlers(typeof(Program).Assembly);
 
 
 var host = builder.Build();
