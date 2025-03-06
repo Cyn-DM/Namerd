@@ -8,21 +8,22 @@ namespace Namerd.Services.MessageCreators;
 
 public static class SettingMessageCreator
 {
-    public static async Task CreateSettingPermissionExceptionMessage(IInteractionContext context)
+    public static InteractionMessageProperties CreateSettingPermissionExceptionMessage()
     {
         var embed = new EmbedProperties()
             .WithTitle($"Sorry, could not process your request. You do not have the necessary permissions.")
             .WithColor(new (0xE8004F));
         
-        var messageProperties = new MessageProperties
+        var messageProperties = new InteractionMessageProperties
         {
-            Embeds = [embed]
+            Embeds = [embed],
+            Flags = MessageFlags.Ephemeral
         };
 
-        await context.Interaction.Channel.SendMessageAsync(messageProperties);
+        return messageProperties;
     }
     
-    public static async Task CreateSettingMenuMessage(IInteractionContext context)
+    public static InteractionMessageProperties CreateSettingMenuMessage(IInteractionContext context)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Choose the setting you want to change.")
@@ -38,31 +39,31 @@ public static class SettingMessageCreator
             new StringMenuProperties("settingsMenu", settingOptions),
         };
         
-        var messageProperties = new MessageProperties
+        var messageProperties = new InteractionMessageProperties
         {
             Embeds = [embed],
             Components = components,
         };
 
-        await context.Interaction.Channel.SendMessageAsync(messageProperties);
+        return messageProperties;
     }
     
-    public static async Task CreateSettingSucceeded(IInteractionContext context, string message)
+    public static InteractionMessageProperties CreateSettingSucceeded(string message)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Successfully changed the setting!")
             .WithDescription(message)
             .WithColor(new (0xE8004F));
         
-        var messageProperties = new MessageProperties
+        var messageProperties = new InteractionMessageProperties
         {
             Embeds = [embed]
         };
 
-        await context.Interaction.Channel.SendMessageAsync(messageProperties);
+        return messageProperties;
     }
 
-    public static async Task CreateChannelSettingSelectMessage(IInteractionContext context)
+    public static InteractionMessageProperties CreateNominationChannelSelectMessage(IInteractionContext context)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Please choose the channel you want to set the nomination channel to.")
@@ -77,12 +78,12 @@ public static class SettingMessageCreator
             channelComponent
         };
 
-        var messageProperties = new MessageProperties()
+        var messageProperties = new InteractionMessageProperties()
         {
             Embeds = [embed],
             Components = components,
         };
         
-        await context.Interaction.Channel.SendMessageAsync(messageProperties);
+        return messageProperties;
     }
 }

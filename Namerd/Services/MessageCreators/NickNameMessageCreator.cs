@@ -1,12 +1,13 @@
 ﻿using NetCord;
 using NetCord.Rest;
+using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
 
 namespace Namerd.Services.MessageCreators;
 
 public static class NickNameMessageCreator
 {
-    public static async Task<RestMessage> CreateVoteResultMessage(ApplicationCommandContext context, GuildUser user,
+    public static async Task CreateVoteResultMessage(IInteractionContext context, GuildUser user,
         string nickname, bool voteSucceeded, bool userIsOwner)
     {
         var usernames = GetUsernames(context, user);
@@ -38,12 +39,10 @@ public static class NickNameMessageCreator
             Embeds = [embed]
         };
 
-        var message = await context.Channel.SendMessageAsync(messageProperties);
-
-        return message;
+        await context.Interaction.Channel.SendMessageAsync(messageProperties);
     }
 
-    public static async Task<RestMessage> CreateVoteStartMessage(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
+    public static InteractionMessageProperties CreateVoteStartMessage(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
     {
         var usernames = GetUsernames(context, user);
         
@@ -59,43 +58,37 @@ public static class NickNameMessageCreator
             .WithColor(new (0xE8004F));
         
         
-        var messageProperties = new MessageProperties
+        var messageProperties = new InteractionMessageProperties()
         {
-            Embeds = [embed]
+            Embeds = [embed],
         };
 
-
-        await CreateMentionMessage(context, user);
-        var message = await context.Channel.SendMessageAsync(messageProperties);
-        await message.AddReactionAsync("👍");
-        await message.AddReactionAsync("👎");
-
-        return message;
+        return messageProperties;
     }
 
-    private static async Task CreateMentionMessage(ApplicationCommandContext context, GuildUser user)
+    public static async Task CreateMentionMessage(IInteractionContext context, GuildUser user)
     {
-        string messageContent = $"Calling {user}!"; // 'user.ToString()' returns the mention string
-        await context.Channel.SendMessageAsync(messageContent);
+        string messageContent = $"Calling {user}!";
+        await context.Interaction.Channel.SendMessageAsync(messageContent);
     }
 
-    public static async Task CreateInvalidNickNameMessage(ApplicationCommandContext context, string nickname)
+    public static InteractionMessageProperties CreateInvalidNickNameMessage(ApplicationCommandContext context, string nickname)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Sorry, {nickname} is not a valid nickname.")
             .WithColor(new (0xE8004F));
         
-        var messageProperties = new MessageProperties
+        var messageProperties = new InteractionMessageProperties()
         {
             Embeds = [embed]
         };
 
-        await context.Channel.SendMessageAsync(messageProperties);
+        return messageProperties;
     }
 
-    private static (string voteStarterName, string changingUserName) GetUsernames(ApplicationCommandContext context, GuildUser user)
+    private static (string voteStarterName, string changingUserName) GetUsernames(IInteractionContext context, GuildUser user)
     {
-        var voteStarterName = context.User.Username;
+        var voteStarterName = context.Interaction.User.Username;
         
         if (context.Interaction.User is GuildInteractionUser guildUser)
         {
@@ -117,17 +110,17 @@ public static class NickNameMessageCreator
         return (voteStarterName, changingUserName);
     }
 
-    public static async Task CreateInvalidTimeMessage(ApplicationCommandContext context)
+    public static InteractionMessageProperties CreateInvalidTimeMessage()
     {
         var embed = new EmbedProperties()
             .WithTitle($"Please choose a time between 1 minute and 1440 minutes (24 hours).")
             .WithColor(new (0xE8004F));
         
-        var messageProperties = new MessageProperties
+        var messageProperties = new InteractionMessageProperties()
         {
             Embeds = [embed]
         };
 
-        await context.Channel.SendMessageAsync(messageProperties);
+        return messageProperties;
     }
 }

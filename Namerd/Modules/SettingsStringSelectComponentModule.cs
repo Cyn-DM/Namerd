@@ -1,5 +1,6 @@
 ﻿using Namerd.Services;
 using NetCord;
+using NetCord.Rest;
 using NetCord.Services.ComponentInteractions;
 
 namespace Namerd.Modules;
@@ -14,15 +15,20 @@ public class SettingsStringSelectComponentModule : ComponentInteractionModule<St
     }
     
     [ComponentInteraction("settingsMenu")]
-    public async Task ChooseSetting()
+    public InteractionMessageProperties ChooseSetting()
     {
         var option = Context.SelectedValues.FirstOrDefault().ToString();
+        
         switch (option)
         {
-            default: return;
+            
             case "monthlyNominationChannel":
-                await _settingsService.CallNominationChannelMenu(Context);
-                break;
+                return SettingsService.CallNominationChannelMenu(Context);
+            default:
+                return new InteractionMessageProperties()
+                {
+                    Content = "Please select a valid option",
+                };
         }
     }
 }

@@ -4,7 +4,9 @@ using Namerd.Services.MessageCreators;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Rest;
+using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
+using NetCord.Services.Commands;
 
 namespace Namerd.Services;
 
@@ -14,51 +16,60 @@ public static partial class NicknameService
 
     private static partial Regex NicknameRegex();
     
-    public static async Task<bool> ValidateNickname(ApplicationCommandContext context, string nickname)
+
+    public static InteractionMessageProperties VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
     {
         var result = NicknameRegex().Match(nickname);
         
-        Console.WriteLine(nickname.Length);
-        
         if (!result.Success)
         {
-            await NickNameMessageCreator.CreateInvalidNickNameMessage(context, nickname);
+            return NickNameMessageCreator.CreateInvalidNickNameMessage(context, nickname);
+        }
+
+        if (!CheckTimeCorrect(timeInMinutes))
+        {
+            return NickNameMessageCreator.CreateInvalidTimeMessage();
         }
         
-        return result.Success;
+        var messageProperties =  NickNameMessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
+        
+        
+        return messageProperties;
     }
 
-    public static async Task VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
+    public static async Task MentionUserAsync(IInteractionContext context, GuildUser user)
     {
-        var message = await NickNameMessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
-        
+        await NickNameMessageCreator.CreateMentionMessage(context, user);
+    }
+
+    public static async Task ProcessVoting(ulong messageId, int timeInMinutes, IInteractionContext context, GuildUser user, string nickname)
+    {
         var milliseconds = timeInMinutes * 60 * 1000;
         
         await Task.Delay(milliseconds);
         
-        var updatedMessage = await context.Channel.GetMessageAsync(message.Id);
+        var updatedMessage = await context.Interaction.Channel.GetMessageAsync(messageId);
         
-        var voteSuceeded = CheckVoteSuccess(updatedMessage);
+        var voteSucceeded = CheckVoteSuccess(updatedMessage);
 
         try
         {
-            if (voteSuceeded)
+            if (voteSucceeded)
             {
                 await ChangeNickname(context, user, nickname);
             }
 
-            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, false);
+            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSucceeded, false);
         }
         catch (UserIsOwnerException)
         {
-            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSuceeded, true);
+            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSucceeded, true);
         }
-        
     }
 
-    private static async Task ChangeNickname(ApplicationCommandContext context, GuildUser user, string nickname)
+    private static async Task ChangeNickname(IInteractionContext context, GuildUser user, string nickname)
     {
-        var guild = context.Interaction.Guild ?? await context.Client.Rest.GetGuildAsync(context.Interaction.GuildId.Value);
+        var guild = context.Interaction.Guild;
             
         if (user.Id == guild.OwnerId)
         {
@@ -94,11 +105,10 @@ public static partial class NicknameService
         return false;
     }
 
-    public static async Task<bool> CheckTime(ApplicationCommandContext context, int timeInMinutes)
+    private static bool CheckTimeCorrect(int timeInMinutes)
     {
         if (timeInMinutes <= 0 || timeInMinutes > 1440)
         {
-            await NickNameMessageCreator.CreateInvalidTimeMessage(context);
             return false;
         }
 

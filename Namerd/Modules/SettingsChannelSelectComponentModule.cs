@@ -26,11 +26,19 @@ public class SettingsChannelSelectComponentModule : ComponentInteractionModule<C
         {
             if (ex.ReasonPhrase != null)
             {
-                await GeneralMessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase);
+                var callback = InteractionCallback.Message(
+                    GeneralMessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase)
+                );
+            
+                await RespondAsync(callback);
             }
             else
             {
-                await GeneralMessageCreator.CreateDiscordExceptionMessage(Context, "Unknown Error");
+                var callback = InteractionCallback.Message(
+                    GeneralMessageCreator.CreateDiscordExceptionMessage(Context, "Unknown Error")
+                );
+            
+                await RespondAsync(callback);
             }
         }
         catch (Exception e)

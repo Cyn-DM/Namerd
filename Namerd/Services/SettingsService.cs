@@ -1,6 +1,7 @@
 ﻿using Namerd.Persistence.Repository;
 using Namerd.Services.MessageCreators;
 using NetCord;
+using NetCord.Rest;
 using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
@@ -17,7 +18,7 @@ public class SettingsService
 
     }
 
-    public async Task CallSettingsMenu(ApplicationCommandContext context)
+    public static InteractionMessageProperties CallSettingsMenu(ApplicationCommandContext context)
     {
         var user = context.User;
         Permissions userPermissions = new Permissions();
@@ -28,15 +29,15 @@ public class SettingsService
 
         if ((userPermissions & Permissions.Administrator) != 0)
         {
-            await SettingMessageCreator.CreateSettingMenuMessage(context);
+            return SettingMessageCreator.CreateSettingMenuMessage(context);
         }
         else
         {
-            await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
+            return SettingMessageCreator.CreateSettingPermissionExceptionMessage();
         }
     }
 
-    public async Task CallNominationChannelMenu(StringMenuInteractionContext context)
+    public static InteractionMessageProperties CallNominationChannelMenu(StringMenuInteractionContext context)
     {
         var user = context.User;
         Permissions userPermissions = new Permissions();
@@ -47,15 +48,15 @@ public class SettingsService
 
         if ((userPermissions & Permissions.Administrator) != 0)
         {
-            await SettingMessageCreator.CreateChannelSettingSelectMessage(context);
+            return SettingMessageCreator.CreateNominationChannelSelectMessage(context);
         }
         else
         {
-            await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
+            return SettingMessageCreator.CreateSettingPermissionExceptionMessage();
         }
     }
     
-    public async Task SetNominationChannel(IInteractionContext context, Channel channel)
+    public async Task<InteractionMessageProperties> SetNominationChannel(IInteractionContext context, Channel channel)
     {
         var user = context.Interaction.User;
         Permissions userPermissions = new Permissions();
@@ -67,11 +68,11 @@ public class SettingsService
         if ((userPermissions & Permissions.Administrator) != 0)
         {
             await _botRepository.SetNominationChannel(context.Interaction.Guild.Id, channel.Id);
-            await SettingMessageCreator.CreateSettingSucceeded(context, "Successfully set nomination channel.");
+            return SettingMessageCreator.CreateSettingSucceeded("Successfully set nomination channel.");
         }
         else
         {
-            await SettingMessageCreator.CreateSettingPermissionExceptionMessage(context);
+            return SettingMessageCreator.CreateSettingPermissionExceptionMessage();
         }
     }
 }

@@ -16,28 +16,29 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
         try
         {
             var callback = InteractionCallback.Message(
-                new InteractionMessageProperties
-                {
-                    Content = "Got your vote request!",
-                    Flags = MessageFlags.Ephemeral
-                }
-            );
-
+                NicknameService.VoteForNickName(Context, user, nickname, timeInMinutes)
+                );
+            
             await RespondAsync(callback);
 
-            var context = Context;
+            var message = await GetResponseAsync();
+            
+            await message.AddReactionAsync("👍");
+            await message.AddReactionAsync("👎");
 
-            if (await NicknameService.ValidateNickname(context, nickname) &&
-                await NicknameService.CheckTime(context, timeInMinutes))
-            {
-                await NicknameService.VoteForNickName(context, user, nickname, timeInMinutes);
-            }
+            await NicknameService.MentionUserAsync(Context, user);
+            
+            await NicknameService.ProcessVoting(message.Id, timeInMinutes, Context, user, nickname);
         }
         catch (RestException ex)
         {
             if (ex.ReasonPhrase != null)
             {
-                await GeneralMessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase);
+                var callback = InteractionCallback.Message(
+                    GeneralMessageCreator.CreateDiscordExceptionMessage(Context, ex.ReasonPhrase)
+                    );
+            
+                await RespondAsync(callback);
             }
         }
         catch (Exception e)

@@ -1,4 +1,5 @@
-﻿using NetCord.Rest;
+﻿using NetCord;
+using NetCord.Rest;
 using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
 
@@ -6,19 +7,30 @@ namespace Namerd.Services.MessageCreators
 {
     public static class GeneralMessageCreator
     {
-        public static async Task CreateDiscordExceptionMessage(IInteractionContext context, string discordException)
+        public static InteractionMessageProperties CreateDiscordExceptionMessage(IInteractionContext context, string discordException)
         {
             var embed = new EmbedProperties()
                 .WithTitle($"Sorry, could not process your request. Discord exception:")
                 .WithDescription(discordException)
                 .WithColor(new (0xE8004F));
         
-            var messageProperties = new MessageProperties
+            var messageProperties = new InteractionMessageProperties()
             {
-                Embeds = [embed]
+                Embeds = [embed],
+                Flags = MessageFlags.Ephemeral
             };
 
-            await context.Interaction.Channel.SendMessageAsync(messageProperties);
+            return messageProperties;
+        }
+
+        public static InteractionMessageProperties CreateUnknownErrorMessage()
+        {
+            var messageProperties = new InteractionMessageProperties
+            {
+                Content = "Got your request, but something went wrong.",
+                Flags = MessageFlags.Ephemeral
+            };
+            return messageProperties;
         }
     }
 }
