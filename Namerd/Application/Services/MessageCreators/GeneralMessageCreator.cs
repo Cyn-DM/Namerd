@@ -1,9 +1,8 @@
 ﻿using NetCord;
 using NetCord.Rest;
 using NetCord.Services;
-using NetCord.Services.ApplicationCommands;
 
-namespace Namerd.Services.MessageCreators
+namespace Namerd.Application.Services.MessageCreators
 {
     public static class GeneralMessageCreator
     {

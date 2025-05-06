@@ -1,9 +1,8 @@
-﻿using Namerd.Services;
-using NetCord;
+﻿using Namerd.Application.Services;
 using NetCord.Rest;
 using NetCord.Services.ComponentInteractions;
 
-namespace Namerd.Modules;
+namespace Namerd.Application.Modules;
 
 public class SettingsStringSelectComponentModule : ComponentInteractionModule<StringMenuInteractionContext>
 {

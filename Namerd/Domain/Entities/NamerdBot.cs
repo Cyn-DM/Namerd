@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using NetCord;
-using NetCord.Gateway;
 
-namespace Namerd.Domain;
+namespace Namerd.Domain.Entities;
 
 public class NamerdBot
 {

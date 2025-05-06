@@ -1,11 +1,9 @@
-﻿using Namerd.Services;
-using Namerd.Services.MessageCreators;
-using NetCord;
-using NetCord.Gateway;
+﻿using Namerd.Application.Services;
+using Namerd.Application.Services.MessageCreators;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
-namespace Namerd.Modules;
+namespace Namerd.Application.Modules;
 
 public class SettingsModule : ApplicationCommandModule<ApplicationCommandContext>
 {

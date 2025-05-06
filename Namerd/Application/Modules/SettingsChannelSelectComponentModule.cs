@@ -1,10 +1,10 @@
-﻿using Namerd.Services;
-using Namerd.Services.MessageCreators;
+﻿using Namerd.Application.Services;
+using Namerd.Application.Services.MessageCreators;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ComponentInteractions;
 
-namespace Namerd.Modules;
+namespace Namerd.Application.Modules;
 
 public class SettingsChannelSelectComponentModule : ComponentInteractionModule<ChannelMenuInteractionContext>
 {

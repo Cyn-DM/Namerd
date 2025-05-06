@@ -1,14 +1,14 @@
 ﻿using System.Text.RegularExpressions;
+using Namerd.Application.Interfaces;
+using Namerd.Application.Results;
+using Namerd.Application.Services.MessageCreators;
 using Namerd.CustomExceptions;
-using Namerd.Services.MessageCreators;
+using Namerd.Domain.Enums;
 using NetCord;
-using NetCord.Gateway;
 using NetCord.Rest;
 using NetCord.Services;
-using NetCord.Services.ApplicationCommands;
-using NetCord.Services.Commands;
 
-namespace Namerd.Services;
+namespace Namerd.Application.Services;
 
 public static partial class NicknameService
 {
@@ -17,32 +17,34 @@ public static partial class NicknameService
     private static partial Regex NicknameRegex();
     
 
-    public static InteractionMessageProperties VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
+    public static NicknameVoteResult VoteForNickname(IApplicationCommandContext context, IGuildUser user, string nickname, int timeInMinutes)
     {
         var result = NicknameRegex().Match(nickname);
+        InteractionMessageProperties properties;
         
         if (!result.Success)
         {
-            return NickNameMessageCreator.CreateInvalidNickNameMessage(context, nickname);
+            properties = NickNameMessageCreator.CreateInvalidNickNameMessage(nickname);
+            return NicknameVoteResult.Failure(properties,NicknameVoteErrorType.NicknameInvalid);
         }
 
         if (!CheckTimeCorrect(timeInMinutes))
         {
-            return NickNameMessageCreator.CreateInvalidTimeMessage();
+            properties = NickNameMessageCreator.CreateInvalidTimeMessage();
+            return NicknameVoteResult.Failure(properties,NicknameVoteErrorType.TimeInvalid);
         }
         
-        var messageProperties =  NickNameMessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
+        properties =  NickNameMessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
         
-        
-        return messageProperties;
+        return NicknameVoteResult.Success(properties);
     }
 
-    public static async Task MentionUserAsync(IInteractionContext context, GuildUser user)
+    public static async Task MentionUserAsync(IInteractionContext context, IGuildUser user)
     {
         await NickNameMessageCreator.CreateMentionMessage(context, user);
     }
 
-    public static async Task ProcessVoting(ulong messageId, int timeInMinutes, IInteractionContext context, GuildUser user, string nickname)
+    public static async Task ProcessVoting(ulong messageId, int timeInMinutes, IInteractionContext context, IGuildUser user, string nickname)
     {
         var milliseconds = timeInMinutes * 60 * 1000;
         
@@ -67,7 +69,7 @@ public static partial class NicknameService
         }
     }
 
-    private static async Task ChangeNickname(IInteractionContext context, GuildUser user, string nickname)
+    private static async Task ChangeNickname(IInteractionContext context, IGuildUser user, string nickname)
     {
         var guild = context.Interaction.Guild;
             

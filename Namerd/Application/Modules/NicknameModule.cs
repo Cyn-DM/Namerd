@@ -1,22 +1,23 @@
-﻿using Namerd.CustomExceptions;
-using Namerd.Services;
-using Namerd.Services.MessageCreators;
+﻿using Namerd.Application.Services;
+using Namerd.Application.Services.MessageCreators;
+using Namerd.Application.Wrappers;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
-namespace Namerd.Modules;
+namespace Namerd.Application.Modules;
 
 public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext>
 {
     
     [SlashCommand("nicknamevote", "Starts a nickname vote")]
-    public async Task StartVote(GuildUser user, string nickname, int timeInMinutes)
+    public async Task StartVote(GuildUser guildUser, string nickname, int timeInMinutes)
     {
         try
         {
+            var user = new ProductionGuildUser(guildUser);
             var callback = InteractionCallback.Message(
-                NicknameService.VoteForNickName(Context, user, nickname, timeInMinutes)
+                NicknameService.VoteForNickname(new ProductionApplicationCommandContext(Context), user, nickname, timeInMinutes).MessageProperties
                 );
             
             await RespondAsync(callback);
@@ -25,7 +26,7 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
             
             await message.AddReactionAsync("👍");
             await message.AddReactionAsync("👎");
-
+            
             await NicknameService.MentionUserAsync(Context, user);
             
             await NicknameService.ProcessVoting(message.Id, timeInMinutes, Context, user, nickname);

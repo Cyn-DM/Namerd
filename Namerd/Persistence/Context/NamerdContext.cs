@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Namerd.Domain;
+using Namerd.Domain.Entities;
 
 namespace Namerd.Persistence.Context;
 

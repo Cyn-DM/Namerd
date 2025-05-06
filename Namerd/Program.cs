@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Namerd.Application.Services;
 using Namerd.Persistence.Context;
 using Namerd.Persistence.Repository;
-using Namerd.Services;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;

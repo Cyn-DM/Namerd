@@ -1,13 +1,13 @@
-﻿using NetCord;
+﻿using Namerd.Application.Interfaces;
+using NetCord;
 using NetCord.Rest;
 using NetCord.Services;
-using NetCord.Services.ApplicationCommands;
 
-namespace Namerd.Services.MessageCreators;
+namespace Namerd.Application.Services.MessageCreators;
 
 public static class NickNameMessageCreator
 {
-    public static async Task CreateVoteResultMessage(IInteractionContext context, GuildUser user,
+    public static async Task CreateVoteResultMessage(IInteractionContext context, IGuildUser user,
         string nickname, bool voteSucceeded, bool userIsOwner)
     {
         var usernames = GetUsernames(context, user);
@@ -42,7 +42,7 @@ public static class NickNameMessageCreator
         await context.Interaction.Channel.SendMessageAsync(messageProperties);
     }
 
-    public static InteractionMessageProperties CreateVoteStartMessage(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
+    public static InteractionMessageProperties CreateVoteStartMessage(IApplicationCommandContext context, IGuildUser user, string nickname, int timeInMinutes)
     {
         var usernames = GetUsernames(context, user);
         
@@ -66,13 +66,13 @@ public static class NickNameMessageCreator
         return messageProperties;
     }
 
-    public static async Task CreateMentionMessage(IInteractionContext context, GuildUser user)
+    public static async Task CreateMentionMessage(IInteractionContext context, IGuildUser user)
     {
         string messageContent = $"Calling {user}!";
         await context.Interaction.Channel.SendMessageAsync(messageContent);
     }
 
-    public static InteractionMessageProperties CreateInvalidNickNameMessage(ApplicationCommandContext context, string nickname)
+    public static InteractionMessageProperties CreateInvalidNickNameMessage(string nickname)
     {
         var embed = new EmbedProperties()
             .WithTitle($"Sorry, {nickname} is not a valid nickname.")
@@ -86,7 +86,7 @@ public static class NickNameMessageCreator
         return messageProperties;
     }
 
-    private static (string voteStarterName, string changingUserName) GetUsernames(IInteractionContext context, GuildUser user)
+    private static (string voteStarterName, string changingUserName) GetUsernames(IInteractionContext context, IGuildUser user)
     {
         var voteStarterName = context.Interaction.User.Username;
         

@@ -1,12 +1,12 @@
-﻿using Namerd.Persistence.Repository;
-using Namerd.Services.MessageCreators;
+﻿using Namerd.Application.Services.MessageCreators;
+using Namerd.Persistence.Repository;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services;
 using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
 
-namespace Namerd.Services;
+namespace Namerd.Application.Services;
 
 public class SettingsService
 {
