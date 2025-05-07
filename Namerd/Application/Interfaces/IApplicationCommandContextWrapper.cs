@@ -1,12 +1,11 @@
 ﻿using NetCord;
 using NetCord.Gateway;
-using NetCord.Services;
 
 namespace Namerd.Application.Interfaces;
 
-public interface IApplicationCommandContext : IInteractionContext
+public interface IApplicationCommandContextWrapper : IInteractionContextWrapper
 {
     public Guild? Guild { get; }
     public TextChannel Channel { get; }
-    public User User { get; }
+    public IUserWrapper UserWrapper { get; }
 }

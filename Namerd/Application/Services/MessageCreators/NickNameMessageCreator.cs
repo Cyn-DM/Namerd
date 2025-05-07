@@ -7,10 +7,10 @@ namespace Namerd.Application.Services.MessageCreators;
 
 public static class NickNameMessageCreator
 {
-    public static async Task CreateVoteResultMessage(IInteractionContext context, IGuildUser user,
+    public static async Task CreateVoteResultMessage(IInteractionContextWrapper contextWrapper, IGuildUserWrapper userWrapper,
         string nickname, bool voteSucceeded, bool userIsOwner)
     {
-        var usernames = GetUsernames(context, user);
+        var usernames = GetUsernames(contextWrapper, userWrapper);
 
         var result = "";
         if (voteSucceeded && !userIsOwner)
@@ -39,12 +39,12 @@ public static class NickNameMessageCreator
             Embeds = [embed]
         };
 
-        await context.Interaction.Channel.SendMessageAsync(messageProperties);
+        await contextWrapper.InteractionWrapper.Channel.SendMessageAsync(messageProperties);
     }
 
-    public static InteractionMessageProperties CreateVoteStartMessage(IApplicationCommandContext context, IGuildUser user, string nickname, int timeInMinutes)
+    public static InteractionMessageProperties CreateVoteStartMessage(IApplicationCommandContextWrapper contextWrapper, IGuildUserWrapper userWrapper, string nickname, int timeInMinutes)
     {
-        var usernames = GetUsernames(context, user);
+        var usernames = GetUsernames(contextWrapper, userWrapper);
         
         var embed = new EmbedProperties()
             .WithTitle($"New nickname vote for {usernames.changingUserName}!")
@@ -66,10 +66,10 @@ public static class NickNameMessageCreator
         return messageProperties;
     }
 
-    public static async Task CreateMentionMessage(IInteractionContext context, IGuildUser user)
+    public static async Task CreateMentionMessage(IInteractionContextWrapper contextWrapper, IGuildUserWrapper userWrapper)
     {
-        string messageContent = $"Calling {user}!";
-        await context.Interaction.Channel.SendMessageAsync(messageContent);
+        string messageContent = $"Calling {userWrapper}!";
+        await contextWrapper.InteractionWrapper.Channel.SendMessageAsync(messageContent);
     }
 
     public static InteractionMessageProperties CreateInvalidNickNameMessage(string nickname)
@@ -86,11 +86,11 @@ public static class NickNameMessageCreator
         return messageProperties;
     }
 
-    private static (string voteStarterName, string changingUserName) GetUsernames(IInteractionContext context, IGuildUser user)
+    private static (string voteStarterName, string changingUserName) GetUsernames(IInteractionContextWrapper contextWrapper, IGuildUserWrapper userWrapper)
     {
-        var voteStarterName = context.Interaction.User.Username;
+        var voteStarterName = contextWrapper.InteractionWrapper.UserWrapper.Username;
         
-        if (context.Interaction.User is GuildInteractionUser guildUser)
+        if (contextWrapper.InteractionWrapper.UserWrapper is IGuildUserWrapper guildUser)
         {
             var voteStarterNickname = guildUser.Nickname;
 
@@ -100,11 +100,11 @@ public static class NickNameMessageCreator
             }
         }
 
-        var changingUserName = user.Username;
+        var changingUserName = userWrapper.Username;
         
-        if (user.Nickname != null)
+        if (userWrapper.Nickname != null)
         {
-            changingUserName = user.Nickname;
+            changingUserName = userWrapper.Nickname;
         }
         
         return (voteStarterName, changingUserName);

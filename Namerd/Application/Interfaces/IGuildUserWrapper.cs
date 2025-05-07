@@ -4,14 +4,12 @@ using System.Threading;
 
 namespace Namerd.Application.Interfaces;
 
-public interface IGuildUser
+public interface IGuildUserWrapper : IUserWrapper
 {
-    public ulong Id { get; }
     public string? Nickname { get; }
-    public string? Username { get; }
     public ulong GuildId { get; }
     
-    public Task<IGuildUser> ModifyAsync(
+    public Task<IGuildUserWrapper> ModifyAsync(
         Action<GuildUserOptions> action,
         RestRequestProperties? properties = null,
         CancellationToken cancellationToken = default);

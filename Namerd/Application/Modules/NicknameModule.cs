@@ -15,9 +15,10 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
     {
         try
         {
-            var user = new ProductionGuildUser(guildUser);
+            var context = new ProductionApplicationCommandContextWrapper(Context);
+            var user = new ProductionGuildUserWrapper(guildUser);
             var callback = InteractionCallback.Message(
-                NicknameService.VoteForNickname(new ProductionApplicationCommandContext(Context), user, nickname, timeInMinutes).MessageProperties
+                NicknameService.VoteForNickname(context, user, nickname, timeInMinutes).MessageProperties
                 );
             
             await RespondAsync(callback);
@@ -27,9 +28,9 @@ public class NicknameModule : ApplicationCommandModule<ApplicationCommandContext
             await message.AddReactionAsync("👍");
             await message.AddReactionAsync("👎");
             
-            await NicknameService.MentionUserAsync(Context, user);
+            await NicknameService.MentionUserAsync(context, user);
             
-            await NicknameService.ProcessVoting(message.Id, timeInMinutes, Context, user, nickname);
+            await NicknameService.ProcessVoting(message.Id, timeInMinutes, context, user, nickname);
         }
         catch (RestException ex)
         {

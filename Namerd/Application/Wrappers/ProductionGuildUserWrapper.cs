@@ -4,11 +4,11 @@ using NetCord.Rest;
 
 namespace Namerd.Application.Wrappers;
 
-public class ProductionGuildUser : IGuildUser
+public class ProductionGuildUserWrapper : IGuildUserWrapper
 {
     private readonly GuildUser _guildUser;
 
-    public ProductionGuildUser(GuildUser guildUser)
+    public ProductionGuildUserWrapper(GuildUser guildUser)
     {
         _guildUser = guildUser;
     }
@@ -18,12 +18,12 @@ public class ProductionGuildUser : IGuildUser
     public ulong GuildId => _guildUser.GuildId;
     public string? Username => _guildUser.Username;
 
-    public async Task<IGuildUser> ModifyAsync(
+    public async Task<IGuildUserWrapper> ModifyAsync(
         Action<GuildUserOptions> action,
         RestRequestProperties? properties = null,
         CancellationToken cancellationToken = default)
     {
         var result = await _guildUser.ModifyAsync(action, properties, cancellationToken);
-        return new ProductionGuildUser(result);
+        return new ProductionGuildUserWrapper(result);
     }
 }

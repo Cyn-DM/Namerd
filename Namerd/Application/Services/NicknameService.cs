@@ -17,7 +17,7 @@ public static partial class NicknameService
     private static partial Regex NicknameRegex();
     
 
-    public static NicknameVoteResult VoteForNickname(IApplicationCommandContext context, IGuildUser user, string nickname, int timeInMinutes)
+    public static NicknameVoteResult VoteForNickname(IApplicationCommandContextWrapper contextWrapper, IGuildUserWrapper userWrapper, string nickname, int timeInMinutes)
     {
         var result = NicknameRegex().Match(nickname);
         InteractionMessageProperties properties;
@@ -34,23 +34,23 @@ public static partial class NicknameService
             return NicknameVoteResult.Failure(properties,NicknameVoteErrorType.TimeInvalid);
         }
         
-        properties =  NickNameMessageCreator.CreateVoteStartMessage(context, user, nickname, timeInMinutes);
+        properties =  NickNameMessageCreator.CreateVoteStartMessage(contextWrapper, userWrapper, nickname, timeInMinutes);
         
         return NicknameVoteResult.Success(properties);
     }
 
-    public static async Task MentionUserAsync(IInteractionContext context, IGuildUser user)
+    public static async Task MentionUserAsync(IInteractionContextWrapper contextWrapper, IGuildUserWrapper userWrapper)
     {
-        await NickNameMessageCreator.CreateMentionMessage(context, user);
+        await NickNameMessageCreator.CreateMentionMessage(contextWrapper, userWrapper);
     }
 
-    public static async Task ProcessVoting(ulong messageId, int timeInMinutes, IInteractionContext context, IGuildUser user, string nickname)
+    public static async Task ProcessVoting(ulong messageId, int timeInMinutes, IInteractionContextWrapper contextWrapper, IGuildUserWrapper userWrapper, string nickname)
     {
         var milliseconds = timeInMinutes * 60 * 1000;
         
         await Task.Delay(milliseconds);
         
-        var updatedMessage = await context.Interaction.Channel.GetMessageAsync(messageId);
+        var updatedMessage = await contextWrapper.InteractionWrapper.Channel.GetMessageAsync(messageId);
         
         var voteSucceeded = CheckVoteSuccess(updatedMessage);
 
@@ -58,27 +58,27 @@ public static partial class NicknameService
         {
             if (voteSucceeded)
             {
-                await ChangeNickname(context, user, nickname);
+                await ChangeNickname(contextWrapper, userWrapper, nickname);
             }
 
-            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSucceeded, false);
+            await NickNameMessageCreator.CreateVoteResultMessage(contextWrapper, userWrapper, nickname, voteSucceeded, false);
         }
         catch (UserIsOwnerException)
         {
-            await NickNameMessageCreator.CreateVoteResultMessage(context, user, nickname, voteSucceeded, true);
+            await NickNameMessageCreator.CreateVoteResultMessage(contextWrapper, userWrapper, nickname, voteSucceeded, true);
         }
     }
 
-    private static async Task ChangeNickname(IInteractionContext context, IGuildUser user, string nickname)
+    private static async Task ChangeNickname(IInteractionContextWrapper contextWrapper, IGuildUserWrapper userWrapper, string nickname)
     {
-        var guild = context.Interaction.Guild;
+        var guild = contextWrapper.InteractionWrapper.Guild;
             
-        if (user.Id == guild.OwnerId)
+        if (userWrapper.Id == guild.OwnerId)
         {
             throw new UserIsOwnerException();
         }
             
-        await user.ModifyAsync(x => x.Nickname = nickname);
+        await userWrapper.ModifyAsync(x => x.Nickname = nickname);
     }
 
     private static bool CheckVoteSuccess(RestMessage restMessage)
