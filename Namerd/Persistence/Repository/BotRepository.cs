@@ -1,4 +1,5 @@
 ﻿using Namerd.Domain;
+using Namerd.Domain.Results;
 using Namerd.Persistence.Context;
 
 namespace Namerd.Persistence.Repository;

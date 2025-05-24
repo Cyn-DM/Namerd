@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Namerd.CustomExceptions;
+using Namerd.Domain;
 using Namerd.Services.MessageCreators;
 using NetCord;
 using NetCord.Gateway;
@@ -12,21 +13,16 @@ namespace Namerd.Services;
 
 public static partial class NicknameService
 {
-    [GeneratedRegex(@"^(?=.{2,32}$)(?!(?:everyone|here)$).+$", RegexOptions.Singleline)]
-
-    private static partial Regex NicknameRegex();
-    
-
     public static InteractionMessageProperties VoteForNickName(ApplicationCommandContext context, GuildUser user, string nickname, int timeInMinutes)
     {
-        var result = NicknameRegex().Match(nickname);
+        var vote = new NicknameVote(nickname, timeInMinutes);
         
-        if (!result.Success)
+        if (!vote.IsValidNickname())
         {
             return NickNameMessageCreator.CreateInvalidNickNameMessage(context, nickname);
         }
 
-        if (!CheckTimeCorrect(timeInMinutes))
+        if (!vote.IsValidTime())
         {
             return NickNameMessageCreator.CreateInvalidTimeMessage();
         }
@@ -49,9 +45,9 @@ public static partial class NicknameService
         await Task.Delay(milliseconds);
         
         var updatedMessage = await context.Interaction.Channel.GetMessageAsync(messageId);
+        var voteCount = CountVotes(updatedMessage);
+        var voteSucceeded = NicknameVote.IsValidVoteResult(voteCount.yesCount, voteCount.noCount);
         
-        var voteSucceeded = CheckVoteSuccess(updatedMessage);
-
         try
         {
             if (voteSucceeded)
@@ -79,7 +75,7 @@ public static partial class NicknameService
         await user.ModifyAsync(x => x.Nickname = nickname);
     }
 
-    private static bool CheckVoteSuccess(RestMessage restMessage)
+    private static (int yesCount, int noCount) CountVotes(RestMessage restMessage)
     {
         var reactions = restMessage.Reactions;
         
@@ -97,22 +93,7 @@ public static partial class NicknameService
             }
         }
 
-        if (yesCount > noCount)
-        {
-            return true;
-        }
-
-        return false;
+        return (yesCount, noCount);
     }
-
-    private static bool CheckTimeCorrect(int timeInMinutes)
-    {
-        if (timeInMinutes <= 0 || timeInMinutes > 1440)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
+    
 }

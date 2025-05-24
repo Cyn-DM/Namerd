@@ -12,13 +12,19 @@ public class NamerdContext : DbContext
     
     public DbSet<NamerdBot> Bots { get; set; }
     public DbSet<Settings> Settings { get; set; }
-    public DbSet<MonthlyNomination> MonthlyNominations { get; set; }
+    public DbSet<NominationPeriod> NominationPeriods { get; set; }
+    public DbSet<Nomination> Nominations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<NamerdBot>()
-            .HasMany(n => n.MonthlyNomination)
+            .HasMany(n => n.NominationPeriods)
             .WithOne(n => n.bot)
             .HasForeignKey(n => n.botId);
+
+        modelBuilder.Entity<NominationPeriod>()
+            .HasMany(n => n.NominationDetails)
+            .WithOne(n => n.NominationPeriod)
+            .HasForeignKey(n => n.NominationPeriodId);
     }
 }

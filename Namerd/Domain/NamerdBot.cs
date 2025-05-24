@@ -9,5 +9,5 @@ public class NamerdBot
     [Key, Required]
     public ulong GuildId { get; set; }
     public Settings Settings { get; set; }
-    public List<MonthlyNomination> MonthlyNomination { get; set; } = new List<MonthlyNomination>();
+    public List<NominationPeriod> NominationPeriods { get; set; } = new List<NominationPeriod>();
 }
