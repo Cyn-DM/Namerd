@@ -43,7 +43,7 @@ public class NominationRepository
             .Where(n => n.GuildId == guildId)
             .Select(n => n.NominationPeriods
                 .Where(np => np.StartDateTime <= now && np.EndDateTime > now)
-                .SelectMany(np => np.NominationDetails)
+                .SelectMany(np => np.Nominations)
                 .Any(nd => nd.UserId == userId))
             .FirstOrDefaultAsync();
         

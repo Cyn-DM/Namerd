@@ -8,4 +8,5 @@ public class Settings
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public ulong NominateChannelId { get; set; }
+    public DateTime NominateEndTimeUTC { get; set; }
 }

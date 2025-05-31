@@ -1,14 +1,18 @@
-﻿namespace Namerd.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Namerd.Domain;
 
 public class Nomination
 {
-    public ulong UserId { get;}
-    public string NominationReason { get; }
-    
+    public ulong UserId { get; set; }
+    [MinLength(1), MaxLength(280)]
+    public string NominationReason { get; set; }
     public Guid NominationPeriodId { get; set; }
     public NominationPeriod NominationPeriod { get; set; }
     
 
+    private Nomination(){}
     public Nomination(string nominationReason, ulong userId)
     {
         this.NominationReason = nominationReason;

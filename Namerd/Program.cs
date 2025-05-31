@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,7 +15,6 @@ using NetCord.Hosting.Services.ApplicationCommands;
 using NetCord.Hosting.Services.ComponentInteractions;
 using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
-using Quartz;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -22,10 +23,8 @@ builder.Configuration
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>(optional: true);
 var dbConnectionString = builder.Configuration["DbConnectionString"];
-builder.Services.AddQuartz();
-builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
-builder.Services.Configure<GatewayClientOptions>(builder.Configuration.GetSection("Token"));
+builder.Services.Configure<GatewayClientOptions>(builder.Configuration.GetSection("DevToken"));
 builder.Services.AddDbContext<NamerdContext>(options => options.UseNpgsql(dbConnectionString));
 
 builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents.All; });
@@ -42,14 +41,17 @@ builder.Services.AddApplicationCommands<ApplicationCommandInteraction, Applicati
 
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<BotRepository>();
+builder.Services.AddScoped<NominationService>();
+builder.Services.AddScoped<NominationRepository>();
 
 builder.Services.AddGatewayEventHandlers(typeof(Program).Assembly);
 
+builder.Services.AddHangfire(configuration => configuration
+    .UsePostgreSqlStorage(options => options
+        .UseNpgsqlConnection(() => dbConnectionString)));
+builder.Services.AddHangfireServer();
 
 var host = builder.Build();
-
-var schedulerFactory = host.Services.GetService<ISchedulerFactory>();
-var scheduler = await schedulerFactory.GetScheduler();
 
 
 host.AddModules(typeof(Program).Assembly);

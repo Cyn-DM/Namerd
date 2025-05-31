@@ -12,3 +12,4 @@ riderModule.iml
 .codebuddy/db/lucene/version.txt
 
 .codebuddy/db/lucene/write.lock
+.idea/

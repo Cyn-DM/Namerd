@@ -17,13 +17,16 @@ public class NamerdContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Nomination>()
+            .HasKey(e => new { e.UserId, e.NominationPeriodId });
+        
         modelBuilder.Entity<NamerdBot>()
             .HasMany(n => n.NominationPeriods)
             .WithOne(n => n.bot)
             .HasForeignKey(n => n.botId);
 
         modelBuilder.Entity<NominationPeriod>()
-            .HasMany(n => n.NominationDetails)
+            .HasMany(n => n.Nominations)
             .WithOne(n => n.NominationPeriod)
             .HasForeignKey(n => n.NominationPeriodId);
     }
