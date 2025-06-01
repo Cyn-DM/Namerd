@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Namerd.Persistence.Context;
 using Namerd.Persistence.Repository;
 using Namerd.Services;
@@ -23,11 +24,12 @@ builder.Configuration
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>(optional: true);
 var dbConnectionString = builder.Configuration["DbConnectionString"];
+var token = builder.Configuration["Discord:Token"];
 
-builder.Services.Configure<GatewayClientOptions>(builder.Configuration.GetSection("DevToken"));
 builder.Services.AddDbContext<NamerdContext>(options => options.UseNpgsql(dbConnectionString));
-
-builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents.All; });
+builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents.All;
+    options.Token = token;
+});
 
 builder.Services.AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>();
 builder.Services.AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>();
@@ -43,13 +45,16 @@ builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<BotRepository>();
 builder.Services.AddScoped<NominationService>();
 builder.Services.AddScoped<NominationRepository>();
+/*builder.Services.AddHangfire(configuration => configuration
+    .UsePostgreSqlStorage(options => options
+        .UseNpgsqlConnection(() => dbConnectionString)));
+builder.Services.AddHangfireServer();*/
 
 builder.Services.AddGatewayEventHandlers(typeof(Program).Assembly);
 
-builder.Services.AddHangfire(configuration => configuration
-    .UsePostgreSqlStorage(options => options
-        .UseNpgsqlConnection(() => dbConnectionString)));
-builder.Services.AddHangfireServer();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(); 
+builder.Logging.SetMinimumLevel(LogLevel.Debug); 
 
 var host = builder.Build();
 

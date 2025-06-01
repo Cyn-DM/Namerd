@@ -1,7 +1,6 @@
 ﻿using Namerd.Domain;
-using NUnit.Framework;
 
-namespace Namerd.Testing.Unit;
+namespace NamerdTests.Unit;
 
 [TestFixture]
 public class NicknameVoteUnitTests
