@@ -24,11 +24,11 @@ builder.Configuration
     .AddEnvironmentVariables()
     .AddUserSecrets<Program>(optional: true);
 var dbConnectionString = builder.Configuration["DbConnectionString"];
-var token = builder.Configuration["Discord:Token"];
 
 builder.Services.AddDbContext<NamerdContext>(options => options.UseNpgsql(dbConnectionString));
-builder.Services.AddDiscordGateway(options => { options.Intents = GatewayIntents.All;
-    options.Token = token;
+builder.Services.AddDiscordGateway(options =>
+{
+    options.Intents = GatewayIntents.All;
 });
 
 builder.Services.AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>();
@@ -45,10 +45,10 @@ builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<BotRepository>();
 builder.Services.AddScoped<NominationService>();
 builder.Services.AddScoped<NominationRepository>();
-/*builder.Services.AddHangfire(configuration => configuration
+builder.Services.AddHangfire(configuration => configuration
     .UsePostgreSqlStorage(options => options
         .UseNpgsqlConnection(() => dbConnectionString)));
-builder.Services.AddHangfireServer();*/
+builder.Services.AddHangfireServer();
 
 builder.Services.AddGatewayEventHandlers(typeof(Program).Assembly);
 
